@@ -1,7 +1,22 @@
 {
-  "buildCommand": "bun run build",
+  "buildCommand": "bun run build:preview",
   "outputDirectory": "dist",
   "installCommand": "bun install",
   "framework": "vite",
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
+      ]
+    }
+  ]
 }
