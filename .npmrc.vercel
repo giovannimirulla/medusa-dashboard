@@ -1,0 +1,4 @@
+# GitHub Packages registry per i pacchetti @giovannimirulla
+# Il token viene letto dalla variabile d'ambiente NODE_AUTH_TOKEN su Vercel
+@giovannimirulla:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}

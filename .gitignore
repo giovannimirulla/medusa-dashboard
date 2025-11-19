@@ -29,6 +29,7 @@ dist-ssr
 .npmrc
 !.env.example
 !.env.template
+!.npmrc.vercel
 
 # Tokens / artefatti accidentali
 *.pem
