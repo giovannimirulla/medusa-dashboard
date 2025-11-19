@@ -1,8 +1,8 @@
 {
-  "buildCommand": "bun run build:preview",
-  "outputDirectory": "dist",
-  "installCommand": "bun install",
-  "framework": "vite",
+  "buildCommand": "chmod +x scripts/download-artifact.sh && scripts/download-artifact.sh",
+  "outputDirectory": "admin",
+  "installCommand": "echo 'No install needed'",
+  "framework": null,
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
