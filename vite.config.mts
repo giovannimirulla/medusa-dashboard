@@ -16,10 +16,12 @@ export default defineConfig(({ mode }) => {
    * Add this to your .env file to specify the project to load admin extensions from.
    * VITE_MEDUSA_PROJECT: Load from backend project (local dev)
    * VITE_MEDUSA_SOURCES: Load from npm packages (comma-separated)
+   * 
+   * Note: For npm packages, we append /admin to use the package's admin export
    */
   const MEDUSA_PROJECT = env.VITE_MEDUSA_PROJECT || null
   const MEDUSA_SOURCES = env.VITE_MEDUSA_SOURCES 
-    ? env.VITE_MEDUSA_SOURCES.split(',').map(s => s.trim())
+    ? env.VITE_MEDUSA_SOURCES.split(',').map(s => s.trim() + '/admin')
     : []
   
   const sources = MEDUSA_PROJECT 
