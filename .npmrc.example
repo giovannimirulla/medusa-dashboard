@@ -1,7 +1,0 @@
-# Autenticazione per GitHub Packages
-# Copia questo file in .npmrc e sostituisci TOKEN con il tuo GitHub PAT
-
-@giovannimirulla:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=TOKEN
-
-# Per Vercel: aggiungi NODE_AUTH_TOKEN nelle environment variables

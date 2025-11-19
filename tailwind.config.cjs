@@ -12,9 +12,7 @@ module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", medusaUI],
   darkMode: "class",
   theme: {
-    extend: {
-      colors: require("./src/lib/colors").colors,
-    },
+    extend: {},
   },
   plugins: [],
 }

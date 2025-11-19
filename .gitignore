@@ -23,17 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
-
-# Env & secrets (AGGIUNTO DOPO INCIDENTE LEAK)
-.env*
-!.env.example
-!.env.template
-
-# Tokens / artefatti accidentali
-*.pem
-*.key
-*.crt
-*.cert
-*.p12
-*.pfx
-
