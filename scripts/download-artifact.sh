@@ -1,6 +1,22 @@
 #!/bin/bash
 set -e
 
+echo "📦 Installing dependencies..."
+# Check if jq is available, install if needed
+if ! command -v jq &> /dev/null; then
+  echo "Installing jq..."
+  if command -v apt-get &> /dev/null; then
+    apt-get update && apt-get install -y jq
+  elif command -v yum &> /dev/null; then
+    yum install -y jq
+  elif command -v brew &> /dev/null; then
+    brew install jq
+  else
+    echo "❌ Cannot install jq. Please install it manually."
+    exit 1
+  fi
+fi
+
 echo "📦 Downloading admin artifact from GitHub Actions..."
 
 # Get the latest successful workflow run
