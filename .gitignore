@@ -26,10 +26,8 @@ dist-ssr
 
 # Env & secrets (AGGIUNTO DOPO INCIDENTE LEAK)
 .env*
-.npmrc
 !.env.example
 !.env.template
-!.npmrc.vercel
 
 # Tokens / artefatti accidentali
 *.pem
