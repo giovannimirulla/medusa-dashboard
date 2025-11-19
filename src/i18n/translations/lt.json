@@ -2665,11 +2665,11 @@
   },
   "login": {
     "forgotPassword": "Pamiršote slaptažodį? - <0>Atstatyti</0>",
-    "title": "Sveiki atvykę į Medusa",
+    "title": "Sveiki atvykę į Almind",
     "hint": "Prisijunkite, kad pasiektumėte paskyrą"
   },
   "invite": {
-    "title": "Sveiki atvykę į Medusa",
+    "title": "Sveiki atvykę į Almind",
     "hint": "Sukurkite savo paskyrą žemiau",
     "backToLogin": "Atgal į prisijungimą",
     "createAccount": "Sukurti paskyrą",
