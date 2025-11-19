@@ -1,6 +1,6 @@
 {
-  "name": "@medusajs/dashboard",
-  "version": "2.10.1",
+  "name": "@giovannimirulla/medusa-dashboard",
+  "version": "2.10.2",
   "scripts": {
     "generate:static": "node ./scripts/generate-currencies.js && prettier --write ./src/lib/currencies.ts",
     "dev": "vite",
@@ -30,8 +30,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/medusajs/medusa",
-    "directory": "packages/admin/dashboard"
+    "url": "https://github.com/giovannimirulla/medusa-backend"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "files": [
     "package.json",
