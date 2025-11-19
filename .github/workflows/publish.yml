@@ -1,0 +1,80 @@
+name: Publish Dashboard Package
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'package.json'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch: {}
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: '1.2.18'
+
+      - name: Resolve version
+        id: pkg
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          NAME=$(jq -r '.name' package.json)
+          echo "package_name=$NAME" >> $GITHUB_OUTPUT
+          echo "package_version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if version already published
+        id: check
+        run: |
+          NAME='${{ steps.pkg.outputs.package_name }}'
+          VERSION='${{ steps.pkg.outputs.package_version }}'
+          EXISTS=$(npm view "$NAME@$VERSION" version 2>/dev/null || echo 'NONE')
+          if [ "$EXISTS" = "$VERSION" ]; then
+            echo "already=true" >> $GITHUB_OUTPUT
+            echo "Version $VERSION already published, skipping.";
+          else
+            echo "already=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup npm auth for GitHub Packages
+        if: steps.check.outputs.already == 'false'
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > ~/.npmrc
+          echo "registry=https://npm.pkg.github.com" >> ~/.npmrc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        if: steps.check.outputs.already == 'false'
+        run: bun install --no-save
+
+      - name: Build
+        if: steps.check.outputs.already == 'false'
+        run: bun run build
+
+      - name: Publish
+        if: steps.check.outputs.already == 'false'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm publish --access=restricted
+
+      - name: Summary
+        run: |
+          echo "Package: ${{ steps.pkg.outputs.package_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Version: ${{ steps.pkg.outputs.package_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Published: ${{ steps.check.outputs.already == 'false' }}" >> $GITHUB_STEP_SUMMARY
