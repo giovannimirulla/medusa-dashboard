@@ -14,9 +14,19 @@ export default defineConfig(({ mode }) => {
 
   /**
    * Add this to your .env file to specify the project to load admin extensions from.
+   * VITE_MEDUSA_PROJECT: Load from backend project (local dev)
+   * VITE_MEDUSA_SOURCES: Load from npm packages (comma-separated)
    */
   const MEDUSA_PROJECT = env.VITE_MEDUSA_PROJECT || null
-  const sources = MEDUSA_PROJECT ? [MEDUSA_PROJECT] : []
+  const MEDUSA_SOURCES = env.VITE_MEDUSA_SOURCES 
+    ? env.VITE_MEDUSA_SOURCES.split(',').map(s => s.trim())
+    : []
+  
+  const sources = MEDUSA_PROJECT 
+    ? [MEDUSA_PROJECT, ...MEDUSA_SOURCES]
+    : MEDUSA_SOURCES
+
+  console.log('🔌 Medusa Admin Plugin Sources:', sources)
 
   return {
     plugins: [
