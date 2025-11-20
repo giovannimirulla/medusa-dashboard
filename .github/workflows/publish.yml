@@ -79,9 +79,9 @@ jobs:
           echo "registry=https://registry.npmjs.org" >> ~/.npmrc
           npm whoami || echo 'whoami fallito (token?)'
 
-      - name: Install dependencies (prod only)
+      - name: Install dependencies
         if: steps.check.outputs.already == 'false'
-        run: bun install --no-save --production=false
+        run: bun install --no-save
 
       - name: Build
         if: steps.check.outputs.already == 'false'
