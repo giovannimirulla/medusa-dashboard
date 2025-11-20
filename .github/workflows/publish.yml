@@ -1,45 +1,101 @@
-name: Publish to GitHub Packages
+name: Publish Dashboard Package
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to publish (e.g., 0.0.2)'
-        required: false
+    branches: [ main ]
+    paths:
+      - 'package.json'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch: {}
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    
+    timeout-minutes: 15
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: 1.1.38
-
-      - name: Setup Node.js
+      - name: Setup Node (publish)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@giovannimirulla'
 
-      - name: Install dependencies
-        run: bun install
+      - name: Setup Bun (build)
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: '1.2.18'
 
-      - name: Build plugin
-        run: bun run build
+      - name: Resolve version
+        id: pkg
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          NAME=$(jq -r '.name' package.json)
+          echo "package_name=$NAME" >> $GITHUB_OUTPUT
+          echo "package_version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Publish to GitHub Packages
-        run: npm publish
+      - name: Check if version already published
+        id: check
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NAME='${{ steps.pkg.outputs.package_name }}'
+          VERSION='${{ steps.pkg.outputs.package_version }}'
+          # Ensure scope registry is set before view
+          npm config set @giovannimirulla:registry https://npm.pkg.github.com
+          EXISTS=$(npm view "$NAME@$VERSION" version 2>/dev/null || echo 'NONE')
+          if [ "$EXISTS" = "$VERSION" ]; then
+            echo "already=true" >> $GITHUB_OUTPUT
+            echo "Version $VERSION already published, skipping.";
+          else
+            echo "already=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate package token
+        if: steps.check.outputs.already == 'false'
+        run: |
+          if [ -z "$GH_PACKAGES_TOKEN" ]; then
+            echo 'ERRORE: manca secret GH_PACKAGES_TOKEN con scope write:packages (creane uno PAT e aggiungilo ai secrets).';
+            exit 1;
+          fi
+          echo 'GH_PACKAGES_TOKEN presente. Permessi richiesti: repo, write:packages'
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Setup npm auth for GitHub Packages
+        if: steps.check.outputs.already == 'false'
+        env:
+          PUBLISH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${PUBLISH_TOKEN}" > ~/.npmrc
+          echo "@giovannimirulla:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "registry=https://registry.npmjs.org" >> ~/.npmrc
+          npm whoami || echo 'whoami fallito (token?)'
+
+      - name: Install dependencies (prod only)
+        if: steps.check.outputs.already == 'false'
+        run: bun install --no-save --production=false
+
+      - name: Build
+        if: steps.check.outputs.already == 'false'
+        run: bun run build
+
+      - name: Publish
+        if: steps.check.outputs.already == 'false'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        run: |
+          npm publish --access=restricted --ignore-scripts
+
+      - name: Summary
+        run: |
+          echo "Package: ${{ steps.pkg.outputs.package_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Version: ${{ steps.pkg.outputs.package_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "Published: ${{ steps.check.outputs.already == 'false' }}" >> $GITHUB_STEP_SUMMARY
