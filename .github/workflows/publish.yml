@@ -2,13 +2,13 @@ name: Publish Dashboard Package
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'package.json'
-      - '.github/workflows/publish.yml'
-  workflow_dispatch: {}
-  release:
-    types: [published]
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 2.11.4)'
+        required: false
 
 jobs:
   publish:
